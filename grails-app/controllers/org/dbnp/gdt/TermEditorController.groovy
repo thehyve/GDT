@@ -58,15 +58,18 @@ class TermEditorController {
 				def ncboVersionedId = params.get('term-ontology_id')
 				def ontology = null
 
+				if( ncboVersionedId == "null" )
+					ncboVersionedId = null
+				
 				try {
 					// got the ncboId?
-					if (ncboId && ncboId != "null") {
+					if (ncboId) {
 						// find ontology by ncboId
 						ontology = Ontology.findByNcboId(ncboId as int)
-					} else if (ncboVersionedId && ncboVersionedId != "null") {
+					} else if (ncboVersionedId && ncboVersionedId.isNumber() ) {
 						// find ontology by ncboId
 						ontology = Ontology.findByNcboVersionedId(ncboVersionedId as int)
-					} else {
+					} else if( !ncboVersionedId ){
 						// somehow we didn't get both the ncboId as well
 						// as the versioned id. Throw an error.
 						throw new Exception("We did not receive the ontology with your request, please try again")
@@ -78,7 +81,7 @@ class TermEditorController {
 						ontology = (ncboId && ncboId != "null") ? Ontology.getBioPortalOntology( ncboId as int ) : Ontology.getBioPortalOntologyByVersionedId( ncboVersionedId as String )
 
 						// validate and save ontology
-						if (!(ontology.validate() && ontology.save(flush:true))) {
+						if (!(ontology && ontology.validate() && ontology.save(flush:true))) {
 							if (ncboId && ncboId != "null") {
 								throw new Exception("An Ontology with ncboId ${ncboId} (= Ontology ID) does not seem valid. See http://bioportal.bioontology.org/ontologies")
 							} else {

@@ -1,5 +1,5 @@
 package org.dbnp.gdt
-
+import org.apache.commons.logging.LogFactory
 /**
  * This class describes an existing ontology, of which terms can be stored (actually 'cached' would be a better description)
  * in the (global) Term store.
@@ -164,7 +164,8 @@ class Ontology implements Serializable {
 			}
 		} catch (Exception e) {
 			// whoops?!
-			return false
+			LogFactory.getLog(this).error e
+			return null
 		}
 	}
 }
