@@ -54,7 +54,7 @@ class TermEditorController {
 				log.info ".rendering term selection popup"
 			}
 			on("add") {
-				def ncboId = params.get('term-ncbo_id')
+				def ncboIds = params.get('term-ontology_ids')
 				def ncboVersionedId = params.get('term-ontology_id')
 				def ontology = null
 

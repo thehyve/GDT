@@ -785,6 +785,7 @@ class TemplateEditorController {
 	 */
 	def addOntologyById = {
 		def id = (params.containsKey('ncboID')) ? (params.ncboID as int) : 0;
+        // def id = 3194
 
 		// set content type
 		response.setContentType("text/plain; charset=UTF-8")
@@ -903,4 +904,17 @@ class TemplateEditorController {
 
 		return true;
 	}
+
+    def searchOntologyByTerm() {
+        response.setContentType("application/json; charset=UTF-8")
+        def term = params.get("term")
+        render Ontology.searchBioPortalOntologyTerms(term) as JSON
+    }
+
+    def searchTermWithinOntologies() {
+        response.setContentType("application/json; charset=UTF-8")
+        def term = params.get("term")
+        def ontologies = params.get("ontologies")
+        render Ontology.searchTermWithinBioPortalOntology(ontologies, term) as JSON
+    }
 }

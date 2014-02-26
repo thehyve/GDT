@@ -181,8 +181,10 @@ OntologyChooser.prototype = {
 			},
 			source: function(request, response) {
 				var q = $.trim(request.term);
-				var url = "http://bioportal.bioontology.org/search/json_search/" + ontology_id + "?q=" + request.term + "&response=json&callback=?";
-				
+				//var url = "http://bioportal.bioontology.org/search/json_search/" + ontology_id + "?q=" + request.term + "&response=json&callback=?";
+                var url = "http://localhost:8080/gscf/templateEditor/searchOntologyByTerm?term=" + request.term;
+                //console.log("tester de test!1");
+
 				// got cache?
 				if (that.cache[ q ]) {
 					// hide spinner
@@ -194,7 +196,8 @@ OntologyChooser.prototype = {
 					// nope, fetch it from NCBO
 					$.getJSON(url, function(data) {
 						// parse result data
-						var result = that.parseData(data.data, ontology_id);
+						//var result = that.parseData(data.data, ontology_id);
+                        var result = that.readData(data);
 
 						// cache results
 						that.cache[ q ] = result;
@@ -228,7 +231,7 @@ OntologyChooser.prototype = {
 
 				// set hidden fields
 				that.setInputValue(element, 'concept_id', ui.item.concept_id);
-				that.setInputValue(element, 'ontology_id', ui.item.ontology_id);
+				that.setInputValue(element, 'ontology_ids', ontology_id);
 				that.setInputValue(element, 'ncbo_id', ui.item.ncbo_id);
 				that.setInputValue(element, 'full_id', ui.item.full_id);
 
@@ -309,37 +312,54 @@ OntologyChooser.prototype = {
 	 * @return array
 	 */
 	parseData: function(data, ontology_ids) {
-		var parsed = [];
-		var rows = data.split('~!~');
+        var parsed = [];
+        var rows = data.split('~!~');
 
-		for (var i = 0; i < rows.length; i++) {
-			var row = $.trim(rows[i]);
-			if (row) {
-				var cols = row.split('|');
+        for (var i = 0; i < rows.length; i++) {
+            var row = $.trim(rows[i]);
+            if (row) {
+                var cols = row.split('|');
 
-				// If we search in a single ontology, the json doesn't return the
-				// NCBO id in the 8th column (probably because we already know the NCBO id)
-				var ncbo_id;
-				if (cols.length > 8) {
-					ncbo_id = cols[8];
-				} else {
-					ncbo_id = ontology_ids;
-				}
+                // If we search in a single ontology, the json doesn't return the
+                // NCBO id in the 8th column (probably because we already know the NCBO id)
+                var ncbo_id;
+                if (cols.length > 8) {
+                    ncbo_id = cols[8];
+                } else {
+                    ncbo_id = ontology_ids;
+                }
 
-				parsed[ parsed.length ] = {
-					value			: cols[0],
-					label			: cols[0] + ' <span class="about">(' + cols[2] + ')</span> <span class="from">from: ' + cols[ (cols.length - 2) ] + '</span>',
-					preferred_name	: cols[0],  // e.g. Mus musculus musculus
-					concept_id		: cols[1],  // e.g. birnlex_161
-					ontology_id		: cols[3],  // e.g. 29684
-					full_id			: cols[4],  // e.g. http://bioontology.org/projects/ontologies/birnlex#birnlex_161
-					ncbo_id			: ncbo_id   // e.g. 1494
-				}
-			}
-		}
+                parsed[ parsed.length ] = {
+                    value			: cols[0],
+                    label			: cols[0] + ' <span class="about">(' + cols[2] + ')</span> <span class="from">from: ' + cols[ (cols.length - 2) ] + '</span>',
+                    preferred_name	: cols[0],  // e.g. Mus musculus musculus
+                    concept_id		: cols[1],  // e.g. birnlex_161
+                    ontology_id		: cols[3],  // e.g. 29684
+                    full_id			: cols[4],  // e.g. http://bioontology.org/projects/ontologies/birnlex#birnlex_161
+                    ncbo_id			: ncbo_id   // e.g. 1494
+                }
+            }
+        }
 
-		return parsed;
-	},
+        return parsed;
+    },
+
+    readData: function(data) {
+        var parsed = [];
+        $.each(data, function(index, term) {
+            console.log(term);
+            parsed[ parsed.length ] = {
+                value			: term.label,
+                label			: term.label + ' <span class="about">(' + term.ontologyDisplayLabel + ')</span> <span class="from">from: ' + term.accession + '</span>',
+                preferred_name	: term.label,
+                concept_id		: term.accession,
+                ontology_id		: term.ontologyVersionId,
+                full_id			: "undefined",
+                ncbo_id			: term.ontologyAccession
+            }
+        });
+        return parsed;
+    },
 
 	/**
 	 * an ontology field is being copied, store all copied data

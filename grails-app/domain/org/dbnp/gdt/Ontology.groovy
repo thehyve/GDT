@@ -73,6 +73,20 @@ class Ontology implements Serializable {
 			println ("ERROR: ontology with ncboId ${ncboId} could not be found!")
 		}
 	}
+    static List<uk.ac.ebi.ontocat.OntologyTerm> searchBioPortalOntologyTerms(String term) {
+        // Get ontology from BioPortal via Ontocat
+        // TODO: maybe make a static OntologyService instance to be more efficient, and decorate it with caching?
+        uk.ac.ebi.ontocat.OntologyService os = new uk.ac.ebi.ontocat.bioportal.BioportalOntologyService()
+        List<uk.ac.ebi.ontocat.OntologyTerm> o = os.searchAll(term)
+        return o;
+    }
+    static List<uk.ac.ebi.ontocat.OntologyTerm> searchTermWithinBioPortalOntology(String term, String ontology) {
+        // Get ontology from BioPortal via Ontocat
+        // TODO: maybe make a static OntologyService instance to be more efficient, and decorate it with caching?
+        uk.ac.ebi.ontocat.OntologyService os = new uk.ac.ebi.ontocat.bioportal.BioportalOntologyService()
+        List<uk.ac.ebi.ontocat.OntologyTerm> o = os.searchOntology(ontology, term)
+        return o;
+    }
 
 
 	/**
